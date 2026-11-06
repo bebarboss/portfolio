@@ -130,38 +130,51 @@ export const education = {
 export const skillGroups = [
   {
     title: 'Programming & Query',
-    items: ['Python', 'SQL', 'JSON', 'Bash'],
+    items: [
+      { name: 'Python', logos: ['python'] },
+      { name: 'SQL', logos: ['sql'] },
+      { name: 'JSON', logos: ['json'] },
+      { name: 'Bash', logos: ['gnubash'] },
+    ],
   },
   {
     title: 'Data Engineering',
     items: [
-      'Apache Airflow',
-      'ETL / ELT',
-      'Pandas',
-      'PySpark',
-      'Web Scraping (Selenium)',
-      'Incremental Load',
+      { name: 'Apache Airflow', logos: ['apacheairflow'] },
+      { name: 'ETL / ELT', logos: ['etl'] },
+      { name: 'Pandas', logos: ['pandas'] },
+      { name: 'PySpark', logos: ['apachespark'] },
+      { name: 'Web Scraping (Selenium)', logos: ['selenium'] },
+      { name: 'Incremental Load', logos: ['incremental'] },
     ],
   },
   {
     title: 'Databases',
-    items: ['PostgreSQL', 'Oracle', 'Supabase', 'Query Optimization'],
+    items: [
+      { name: 'PostgreSQL', logos: ['postgresql'] },
+      { name: 'Oracle', logos: ['oracle'] },
+      { name: 'Supabase', logos: ['supabase'] },
+      { name: 'Query Optimization', logos: ['query'] },
+    ],
   },
   {
     title: 'Tools',
     items: [
-      'Power BI (DAX)',
-      'Excel · Power Query',
-      'Docker',
-      'Git / GitHub',
-      'Linux CLI',
-      'Vercel',
-      'Arduino IDE',
+      { name: 'Power BI (DAX)', logos: ['powerbi'] },
+      { name: 'Excel · Power Query', logos: ['microsoftexcel'] },
+      { name: 'Docker', logos: ['docker'] },
+      { name: 'Git / GitHub', logos: ['git', 'github'] },
+      { name: 'Linux CLI', logos: ['linux'] },
+      { name: 'Vercel', logos: ['vercel'] },
+      { name: 'Arduino IDE', logos: ['arduino'] },
     ],
   },
   {
     title: 'Languages',
-    items: ['Thai · Native', 'English · Intermediate'],
+    items: [
+      { name: 'Thai · Native', logos: ['thai'] },
+      { name: 'English · Intermediate', logos: ['english'] },
+    ],
   },
 ]
 

@@ -1,4 +1,5 @@
 import PageHero from '../components/PageHero'
+import SkillLogo from '../components/SkillLogo'
 import { Reveal, ScrollBox, SectionReveal } from '../components/motion'
 import { skillGroups, topics } from '../data/content'
 
@@ -28,8 +29,13 @@ export default function Skills() {
                     <h2>{group.title}</h2>
                     <ul>
                       {group.items.map((item) => (
-                        <li className="chip" key={item}>
-                          {item}
+                        <li className="chip" key={item.name}>
+                          <span className="chip__marks">
+                            {item.logos.map((logo) => (
+                              <SkillLogo key={logo} id={logo} />
+                            ))}
+                          </span>
+                          {item.name}
                         </li>
                       ))}
                     </ul>

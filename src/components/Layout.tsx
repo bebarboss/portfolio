@@ -5,6 +5,7 @@ import { nav, profile } from '../data/content'
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
+  const section = location.pathname.split('/').filter(Boolean)[0]
 
   useEffect(() => {
     setMenuOpen(false)
@@ -72,6 +73,25 @@ export default function Layout() {
       </div>
 
       <Outlet />
+
+      <div className="page-back">
+        {location.pathname === '/' ? (
+          <a
+            className="page-back__link"
+            href="#top"
+            onClick={(event) => {
+              event.preventDefault()
+              document.getElementById('top')?.scrollIntoView({ block: 'start' })
+            }}
+          >
+            ↑ กลับด้านบน
+          </a>
+        ) : (
+          <Link className="page-back__link" to={section ? `/#${section}` : '/'}>
+            ← กลับหน้าแรก
+          </Link>
+        )}
+      </div>
 
       <footer className="footer">
         <strong>{profile.monogram}</strong>

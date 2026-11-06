@@ -46,6 +46,17 @@ export default function Certs() {
                 )}
               </motion.div>
             </AnimatePresence>
+            <div className="cert-preview__meta">
+              <p>
+                {String(active + 1).padStart(2, '0')}
+                <span> / {String(certifications.length).padStart(2, '0')}</span>
+              </p>
+              <h2>{cert.name}</h2>
+              <p>
+                {cert.issuer}
+                <span> · {cert.year}</span>
+              </p>
+            </div>
           </div>
 
           <div className="cert-list" role="listbox" aria-label="Certifications">
@@ -58,11 +69,12 @@ export default function Certs() {
                 className={`cert-pick ${i === active ? 'is-active' : ''}`}
                 onClick={() => setActive(i)}
               >
-                <span className="cert-pick__year">{item.year}</span>
+                <span className="cert-pick__index">{String(i + 1).padStart(2, '0')}</span>
                 <span className="cert-pick__copy">
                   <strong>{item.name}</strong>
                   <em>{item.issuer}</em>
                 </span>
+                <span className="cert-pick__year">{item.year}</span>
               </button>
             ))}
           </div>
