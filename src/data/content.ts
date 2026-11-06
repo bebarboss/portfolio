@@ -10,6 +10,14 @@ import botboss from '../assets/images/projects/botboss.png'
 import eolData from '../assets/images/projects/eol-data.png'
 import boa from '../assets/images/projects/boa.png'
 import tiktok from '../assets/images/projects/tiktok.png'
+import notebookRag from '../assets/images/projects/notebook-rag.png'
+import workflowSlipBot from '../assets/images/workflows/slip-bot.png'
+import workflowAirflow from '../assets/images/workflows/airflow-etl.png'
+import workflowBotboss from '../assets/images/workflows/botboss.png'
+import workflowEol from '../assets/images/workflows/eol-data.png'
+import workflowBoa from '../assets/images/workflows/boa.png'
+import workflowTiktok from '../assets/images/workflows/tiktok-pipeline.png'
+import workflowNotebookRag from '../assets/images/workflows/notebook-rag.png'
 import topicAbout from '../assets/images/topics/about.png'
 import topicExperience from '../assets/images/topics/experience.png'
 import topicSkills from '../assets/images/topics/skills.png'
@@ -223,6 +231,7 @@ export const projects = [
     stack: ['Python', 'OpenCV', 'EasyOCR', 'FastAPI', 'Supabase', 'LINE OA', 'Next.js'],
     href: 'https://github.com/bebarboss/slip-bot',
     image: slipBot,
+    workflow: workflowSlipBot,
   },
   {
     slug: 'airflow-etl',
@@ -267,6 +276,7 @@ export const projects = [
     stack: ['Python', 'Pandas', 'Apache Airflow', 'Supabase', 'Streamlit', 'Docker'],
     href: 'https://github.com/bebarboss/Airflow_ETL_products',
     image: airflow,
+    workflow: workflowAirflow,
   },
   {
     slug: 'botboss',
@@ -311,6 +321,7 @@ export const projects = [
     stack: ['Python', 'PyQt6', 'Selenium', 'PyInstaller'],
     href: 'https://github.com/bebarboss/botboss',
     image: botboss,
+    workflow: workflowBotboss,
   },
   {
     slug: 'eol-data',
@@ -355,6 +366,7 @@ export const projects = [
     stack: ['Python', 'Pandas', 'Oracle', 'Streamlit'],
     href: 'https://github.com/bebarboss/EOLdata',
     image: eolData,
+    workflow: workflowEol,
   },
   {
     slug: 'boa',
@@ -399,6 +411,7 @@ export const projects = [
     stack: ['Python', 'OpenCV', 'TensorFlow', 'PyQt5'],
     href: 'https://github.com/bebarboss/BOA',
     image: boa,
+    workflow: workflowBoa,
   },
   {
     slug: 'tiktok-pipeline',
@@ -442,6 +455,62 @@ export const projects = [
     stack: ['Python', 'FastAPI', 'n8n', 'ffmpeg', 'Google AI', 'Zapier'],
     href: 'https://github.com/bebarboss',
     image: tiktok,
+    workflow: workflowTiktok,
+  },
+  {
+    slug: 'notebook-rag',
+    code: '07',
+    name: 'Notebook RAG',
+    blurb:
+      'ผู้ช่วยแบบ NotebookLM ที่ตอบคำถามซัพพอร์ตภาษาไทยจากคู่มือระบบและเคสเก่า พร้อมอ้างอิงหน้าต้นทาง',
+    sections: [
+      {
+        title: 'ปัญหา',
+        paragraphs: [
+          'ทีมซัพพอร์ตต้องเปิดคู่มือหลายไฟล์และย้อนดูเคสเก่าทุกครั้งที่มีคำถาม เอกสารเป็น PDF สแกน ไฟล์ Office และ CSV ของ incident การหาคำตอบที่ใช้ได้จริงจึงช้า และมักไม่รู้ว่าคำตอบมาจากหน้าไหน',
+        ],
+      },
+      {
+        title: 'แนวคิด',
+        paragraphs: [
+          'แยกงานเป็นสองเส้นทาง INGEST แปลงเอกสารเป็นเวกเตอร์เก็บใน PostgreSQL กับ pgvector ส่วน ASK รับคำถามภาษาไทย ค้นคืนบริบท แล้วให้ LLM ตอบพร้อม citation หน้าจอเป็น React ด้วย TanStack Start และ API เป็น FastAPI ใน Docker',
+        ],
+      },
+      {
+        title: 'ลงมือทำ',
+        paragraphs: [
+          'เส้นทางอัปโหลดรับ PDF, DOCX, PPTX, DOC และ Incident CSV ดึงข้อความด้วย PyMuPDF และใช้ LibreOffice แปลงไฟล์ .doc หน้าสแกนที่มีตัวอักษรน้อยกว่า 10 ตัวจะส่งเข้า Typhoon OCR จากนั้นลบหัวท้าย ตัดชิ้นข้อความยาว 1,000 ตัวอักษรทับซ้อน 200 ตัว แล้วฝังด้วย multilingual-e5-small โดยใส่คำนำหน้า passage: ก่อนเก็บลง pgvector แบบ HNSW cosine และกรองตาม service ได้',
+          'เส้นทางถามรับข้อความไทยและสกรีนช็อตที่เป็นทางเลือก แล้วค้น manual กับ incident ได้ฝั่งละ 16 รายการ จากนั้น rerank ด้วยความหมาย รหัส error และ service เหลือ 8 รายการก่อนประกอบบริบทเป็น Manual, Incident และ Known Issues',
+          'LLM agent เลือกใช้ Typhoon, OpenAI, Gemini หรือ Claude ได้ ถ้าบริบทแรกไม่พอ agent เรียก search_manual หรือ search_incident เองได้อีกไม่เกิน 3 รอบ แล้วคืนคำตอบพร้อมจำนวน citation ชี้กลับไปหน้าต้นทาง',
+        ],
+      },
+      {
+        title: 'ผลลัพธ์',
+        paragraphs: [
+          'ได้ผู้ช่วยซัพพอร์ตที่อ่านคู่มือกับเคสเก่าให้ แล้วตอบเป็นภาษาไทยพร้อมอ้างอิง ไม่ต้องไล่เปิดไฟล์เองทีละหน้า',
+        ],
+      },
+      {
+        title: 'บทเรียน',
+        paragraphs: [
+          'เอกสารไทยและหน้าสแกนต้องมี OCR ในไปป์ไลน์ ไม่ใช่แค่ extract ข้อความอย่างเดียว การ rerank ตามรหัส error กับ service ช่วยตัด noise จากเวกเตอร์ล้วน ๆ และ citation กลับไปหน้าต้นทางสำคัญพอ ๆ กับคำตอบ เพราะทีมซัพพอร์ตต้องตรวจซ้ำได้',
+        ],
+      },
+    ],
+    stack: [
+      'Python',
+      'FastAPI',
+      'PostgreSQL',
+      'pgvector',
+      'sentence-transformers',
+      'PyMuPDF',
+      'Typhoon OCR',
+      'React',
+      'Docker',
+    ],
+    href: 'https://github.com/bebarboss',
+    image: notebookRag,
+    workflow: workflowNotebookRag,
   },
 ]
 

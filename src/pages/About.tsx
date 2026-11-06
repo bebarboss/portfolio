@@ -59,7 +59,7 @@ export default function About() {
                       <div className="stat__label">Years engineering ops</div>
                     </div>
                     <div className="stat">
-                      <div className="stat__value">06</div>
+                      <div className="stat__value">07</div>
                       <div className="stat__label">Shipped projects</div>
                     </div>
                     <div className="stat">

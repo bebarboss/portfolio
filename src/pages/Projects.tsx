@@ -11,7 +11,7 @@ export default function Projects() {
       <PageHero
         eyebrow="// Missions"
         title="Projects"
-        lead="Automation, OCR, ETL, and computer vision — builds that cut friction and surface signal."
+        lead="Automation, OCR, ETL, computer vision, and RAG — builds that cut friction and surface signal."
         image={topic.image}
       />
       <SectionReveal className="section projects">

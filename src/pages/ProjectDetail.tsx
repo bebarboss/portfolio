@@ -35,6 +35,20 @@ export default function ProjectDetail() {
           </figure>
         </Reveal>
 
+        <Reveal delay={0.07}>
+          <section className="article__workflow" aria-labelledby="workflow-heading">
+            <h2 className="article__heading" id="workflow-heading">
+              Workflow
+            </h2>
+            <figure className="article__workflow-frame">
+              <img
+                src={project.workflow}
+                alt={`${project.name} workflow chart`}
+              />
+            </figure>
+          </section>
+        </Reveal>
+
         <Reveal delay={0.08}>
           <div className="article__body">
             {project.sections.map((section) => (
