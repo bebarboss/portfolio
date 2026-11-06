@@ -30,11 +30,16 @@ export default function ProjectDetail() {
           </Reveal>
           <Reveal drift="left" delay={0.06}>
             <div className="detail__body">
-              <div className="detail__copy">
-                {project.detail.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
-                ))}
-              </div>
+              {project.sections.map((section) => (
+                <div className="detail__block" key={section.title}>
+                  <h2 className="detail__heading">{section.title}</h2>
+                  <div className="detail__copy">
+                    {section.paragraphs.map((paragraph) => (
+                      <p key={paragraph}>{paragraph}</p>
+                    ))}
+                  </div>
+                </div>
+              ))}
               <h2 className="detail__heading">Stack</h2>
               <ul className="project__stack">
                 {project.stack.map((tech) => (

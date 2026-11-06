@@ -366,7 +366,12 @@ p {
 
 .detail__body {
   display: grid;
-  gap: 1.1rem;
+  gap: 1.35rem;
+}
+
+.detail__block {
+  display: grid;
+  gap: 0.55rem;
 }
 
 .detail__copy {
