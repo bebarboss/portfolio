@@ -1,0 +1,284 @@
+{
+  "name": "Auto TikTok Video Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "trigger-schedule",
+      "name": "1 TRIGGER",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 300],
+      "notes": "ตั้งเวลาอัตโนมัติทุก 6 ชม."
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.GAME_NEWS_RSS_URL }}",
+        "options": {}
+      },
+      "id": "scrape-rss",
+      "name": "2 SCRAPE",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [260, 300],
+      "notes": "ดึงข่าวเกมจาก RSS/เว็บ"
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.GOOGLE_SHEET_ID }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "posted"
+        },
+        "options": {}
+      },
+      "id": "check-db-read",
+      "name": "3 CHECK DB (read)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [520, 300],
+      "notes": "อ่านรายการข่าวที่เคยโพสต์แล้วจาก Google Sheets"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "is-new",
+              "leftValue": "={{ $json.link }}",
+              "rightValue": "={{ $('3 CHECK DB (read)').all().map(r => r.json.link).join('|') }}",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-new",
+      "name": "3b Filter new articles",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [780, 300],
+      "notes": "ข้ามข่าวซ้ำ — ผ่านเฉพาะลิงก์ที่ยังไม่เคยโพสต์"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [{\n    \"parts\": [{\n      \"text\": \"Summarize this game news for a short TikTok voiceover in Thai, max 80 words, energetic tone:\\n\\nTitle: {{ $json.title }}\\n\\n{{ $json.contentSnippet || $json.content }}\"\n    }]\n  }]\n}",
+        "options": {}
+      },
+      "id": "prepare-script",
+      "name": "4a Prepare script",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1040, 200],
+      "notes": "สรุปข่าวเป็นสคริปต์สั้นสำหรับ TTS"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://texttospeech.googleapis.com/v1/text:synthesize",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"input\": {\n    \"text\": \"{{ $json.candidates[0].content.parts[0].text }}\"\n  },\n  \"voice\": {\n    \"languageCode\": \"th-TH\",\n    \"name\": \"th-TH-Standard-A\"\n  },\n  \"audioConfig\": {\n    \"audioEncoding\": \"MP3\",\n    \"speakingRate\": 1.05\n  }\n}",
+        "options": {}
+      },
+      "id": "ai-voice",
+      "name": "4 AI VOICE",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1300, 200],
+      "notes": "แปลงข้อความเป็นเสียงด้วย Google TTS / AI Studio"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.FASTAPI_BASE_URL }}/video/download",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"{{ $('2 SCRAPE').item.json.title }} gameplay\",\n  \"max_seconds\": 45\n}",
+        "options": {}
+      },
+      "id": "video-download",
+      "name": "5 VIDEO",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 200],
+      "notes": "ดาวน์โหลดคลิป YouTube ผ่าน FastAPI + yt-dlp"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.FASTAPI_BASE_URL }}/video/merge",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"audio_base64\": \"{{ $('4 AI VOICE').item.json.audioContent }}\",\n  \"video_path\": \"{{ $json.video_path }}\",\n  \"output_name\": \"tiktok_{{ Date.now() }}.mp4\"\n}",
+        "options": {}
+      },
+      "id": "merge-ffmpeg",
+      "name": "6 MERGE",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1820, 200],
+      "notes": "รวมเสียง + วิดีโอด้วย ffmpeg ผ่าน FastAPI"
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "name": "={{ $json.output_name }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.GOOGLE_DRIVE_FOLDER_ID }}"
+        },
+        "options": {}
+      },
+      "id": "upload-drive",
+      "name": "7 UPLOAD",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [2080, 200],
+      "notes": "อัปโหลดวิดีโอขึ้น Google Drive"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ZAPIER_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"title\": \"{{ $('2 SCRAPE').item.json.title }}\",\n  \"caption\": \"{{ $('4a Prepare script').item.json.candidates[0].content.parts[0].text }}\",\n  \"drive_file_id\": \"{{ $json.id }}\",\n  \"drive_url\": \"{{ $json.webViewLink }}\",\n  \"profile\": \"Adapter-Game\"\n}",
+        "options": {}
+      },
+      "id": "zapier-handoff",
+      "name": "8 ZAPIER",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2340, 200],
+      "notes": "ส่งต่อไปยัง Zapier webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.BUFFER_OR_PUBLISH_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"platform\": \"tiktok\",\n  \"profile\": \"Adapter-Game\",\n  \"media_url\": \"{{ $('7 UPLOAD').item.json.webContentLink }}\",\n  \"text\": \"{{ $('4a Prepare script').item.json.candidates[0].content.parts[0].text }}\\n\\n#gaming #gamenews\"\n}",
+        "options": {}
+      },
+      "id": "publish-tiktok",
+      "name": "9 PUBLISH",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2600, 200],
+      "notes": "โพสต์อัตโนมัติผ่าน Buffer / publish webhook → TikTok"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.GOOGLE_SHEET_ID }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "posted"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "link": "={{ $('2 SCRAPE').item.json.link }}",
+            "title": "={{ $('2 SCRAPE').item.json.title }}",
+            "posted_at": "={{ $now.toISO() }}",
+            "drive_url": "={{ $('7 UPLOAD').item.json.webViewLink }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "log-posted",
+      "name": "Log to Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [2860, 200],
+      "notes": "บันทึกลิงก์ที่โพสต์แล้วเพื่อกันซ้ำรอบถัดไป"
+    }
+  ],
+  "connections": {
+    "1 TRIGGER": {
+      "main": [[{ "node": "2 SCRAPE", "type": "main", "index": 0 }]]
+    },
+    "2 SCRAPE": {
+      "main": [[{ "node": "3 CHECK DB (read)", "type": "main", "index": 0 }]]
+    },
+    "3 CHECK DB (read)": {
+      "main": [[{ "node": "3b Filter new articles", "type": "main", "index": 0 }]]
+    },
+    "3b Filter new articles": {
+      "main": [[{ "node": "4a Prepare script", "type": "main", "index": 0 }]]
+    },
+    "4a Prepare script": {
+      "main": [[{ "node": "4 AI VOICE", "type": "main", "index": 0 }]]
+    },
+    "4 AI VOICE": {
+      "main": [[{ "node": "5 VIDEO", "type": "main", "index": 0 }]]
+    },
+    "5 VIDEO": {
+      "main": [[{ "node": "6 MERGE", "type": "main", "index": 0 }]]
+    },
+    "6 MERGE": {
+      "main": [[{ "node": "7 UPLOAD", "type": "main", "index": 0 }]]
+    },
+    "7 UPLOAD": {
+      "main": [[{ "node": "8 ZAPIER", "type": "main", "index": 0 }]]
+    },
+    "8 ZAPIER": {
+      "main": [[{ "node": "9 PUBLISH", "type": "main", "index": 0 }]]
+    },
+    "9 PUBLISH": {
+      "main": [[{ "node": "Log to Sheets", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "description": "ข่าวเกมสู่ TikTok แบบอัตโนมัติ — อ่านข่าว → แปลงเสียง → รวมคลิป → โพสต์อัตโนมัติ"
+  },
+  "pinData": {}
+}
