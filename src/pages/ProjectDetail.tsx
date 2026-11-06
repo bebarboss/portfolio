@@ -1,6 +1,5 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
-import PageHero from '../components/PageHero'
-import { Reveal, ScrollBox, SectionReveal } from '../components/motion'
+import { Reveal, SectionReveal } from '../components/motion'
 import { getProject } from '../data/content'
 
 export default function ProjectDetail() {
@@ -12,58 +11,60 @@ export default function ProjectDetail() {
   }
 
   return (
-    <main>
-      <PageHero
-        eyebrow={`// Mission ${project.code}`}
-        title={project.name}
-        lead={project.blurb}
-        image={project.image}
-      />
-      <SectionReveal className="section projects">
-        <div className="section__inner detail">
-          <Reveal drift="scale">
-            <ScrollBox from={48} to={-24}>
-              <div className="detail__media">
-                <img src={project.image} alt={`${project.name} preview`} />
-              </div>
-            </ScrollBox>
-          </Reveal>
-          <Reveal drift="left" delay={0.06}>
-            <div className="detail__body">
-              {project.sections.map((section) => (
-                <div className="detail__block" key={section.title}>
-                  <h2 className="detail__heading">{section.title}</h2>
-                  <div className="detail__copy">
-                    {section.paragraphs.map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
-                    ))}
-                  </div>
-                </div>
+    <main className="article-page">
+      <SectionReveal className="article">
+        <Reveal>
+          <header className="article__header">
+            <Link className="article__back" to="/#projects">
+              ← กลับหน้าแรก
+            </Link>
+            <p className="article__eyebrow">Mission {project.code}</p>
+            <h1 className="article__title">{project.name}</h1>
+            <p className="article__dek">{project.blurb}</p>
+            <ul className="article__tags" aria-label="Stack">
+              {project.stack.map((tech) => (
+                <li key={tech}>{tech}</li>
               ))}
-              <h2 className="detail__heading">Stack</h2>
-              <ul className="project__stack">
-                {project.stack.map((tech) => (
-                  <li className="chip" key={tech}>
-                    {tech}
-                  </li>
+            </ul>
+          </header>
+        </Reveal>
+
+        <Reveal delay={0.05}>
+          <figure className="article__hero">
+            <img src={project.image} alt={`${project.name} preview`} />
+          </figure>
+        </Reveal>
+
+        <Reveal delay={0.08}>
+          <div className="article__body">
+            {project.sections.map((section) => (
+              <section className="article__block" key={section.title}>
+                <h2 className="article__heading">{section.title}</h2>
+                {section.paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
                 ))}
-              </ul>
-              <div className="detail__actions">
-                <a
-                  className="btn btn--primary"
-                  href={project.href}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  GitHub
-                </a>
-                <Link className="btn btn--ghost" to="/projects">
-                  All Projects
-                </Link>
-              </div>
+              </section>
+            ))}
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.1}>
+          <footer className="article__footer">
+            <div className="article__footer-row">
+              <a
+                className="btn btn--primary"
+                href={project.href}
+                target="_blank"
+                rel="noreferrer"
+              >
+                GitHub
+              </a>
+              <Link className="btn btn--ghost article__ghost" to="/projects">
+                All Projects
+              </Link>
             </div>
-          </Reveal>
-        </div>
+          </footer>
+        </Reveal>
       </SectionReveal>
     </main>
   )
