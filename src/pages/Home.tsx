@@ -48,35 +48,10 @@ function Hero() {
         </Link>
       </motion.div>
 
-      <a className="valo-hero__scroll" href="#weare" aria-label="Scroll down">
+      <a className="valo-hero__scroll" href="#about" aria-label="Scroll down">
         <span />
       </a>
     </section>
-  )
-}
-
-function WeAre() {
-  return (
-    <SectionReveal className="valo-we" id="weare">
-      <div className="valo-we__inner">
-        <Reveal drift="left">
-          <h2 className="valo-we__title">
-            พวกเราคือ
-            <br />
-            <span>{profile.brand}</span>
-          </h2>
-        </Reveal>
-        <Reveal delay={0.08}>
-          <div className="valo-we__copy">
-            <h3>ก้าวข้ามทุกขีดจำกัด</h3>
-            <p>{profile.summary}</p>
-            <Link className="btn btn--dark" to="/about">
-              เรียนรู้เพิ่มเติม
-            </Link>
-          </div>
-        </Reveal>
-      </div>
-    </SectionReveal>
   )
 }
 
@@ -116,7 +91,6 @@ export default function Home() {
   return (
     <main className="home">
       <Hero />
-      <WeAre />
       <TopicBanners />
     </main>
   )
